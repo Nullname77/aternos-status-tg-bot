@@ -1,10 +1,11 @@
+import os
 import logging
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 from mcstatus import JavaServer
 
-BOT_TOKEN = "BOT_TOKEN"
-MC_SERVER_ADDRESS = "MC_SERVER_ADDRESS"
+BOT_TOKEN = os.environ["BOT_TOKEN"]
+MC_SERVER_ADDRESS = os.environ["MC_SERVER_ADDRESS"]
 
 logging.basicConfig(level=logging.INFO)
 
