@@ -30,9 +30,9 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
         version = status_data.version.name
-        
-        if "Offline" in version or "offline" in version.lower():
-            raise Exception("Заглушка Aternos")
+
+        if version.strip() in ["Offline", "§c● Offline", "§c● offline"]:
+            raise Exception("Фейковая заглушка Aternos")
 
         players = status_data.players.online
         max_players = status_data.players.max
@@ -41,7 +41,7 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"🟢 Сервер онлайн!\nИгроков: {players}/{max_players}\nВерсия: {version}"
         )
     except:
-        await update.message.reply_text("🔴 Сервер оффлайн.")
+        await update.message.reply_text("🔴 Сервер оффлайн, обратитесь к админу.")
 
 if __name__ == "__main__":
     app = Application.builder().token(BOT_TOKEN).build()
