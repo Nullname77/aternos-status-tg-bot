@@ -13,29 +13,31 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     address = MC_SERVER_ADDRESS
     
+    # Первый запрос — пробуждение (без таймаута)
     try:
         server1 = JavaServer.lookup(address)
-        server1 = server1.with_timeout(6)
         await asyncio.get_event_loop().run_in_executor(None, server1.status)
     except:
         pass
 
     await asyncio.sleep(1)
 
+    # Второй запрос — основной
     try:
         server2 = JavaServer.lookup(address)
-        server2 = server2.with_timeout(8)
         status_data = await asyncio.get_event_loop().run_in_executor(None, server2.status)
 
         version = status_data.version.name
         players = status_data.players.online
         max_players = status_data.players.max
 
+        # Отладка
         debug_msg = (
             f"🔍 DEBUG:\nАдрес: {address}\nВерсия: '{version}'\nИгроков: {players}/{max_players}"
         )
         await update.message.reply_text(debug_msg)
 
+        # Проверка заглушки Aternos
         if version.strip() in ["Offline", "§c● Offline", "§c● offline", ""]:
             await update.message.reply_text("🔴 Сервер выключен (заглушка Aternos).")
         else:
