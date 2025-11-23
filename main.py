@@ -1,5 +1,5 @@
 import os
-import logging
+import asyncio
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 from mcstatus import JavaServer
@@ -7,22 +7,40 @@ from mcstatus import JavaServer
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 MC_SERVER_ADDRESS = os.environ["MC_SERVER_ADDRESS"]
 
-logging.basicConfig(level=logging.INFO)
-
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Привет! Напиши /status, чтобы проверить сервер.")
 
 async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    address = MC_SERVER_ADDRESS
+    
     try:
-        server = JavaServer.lookup(MC_SERVER_ADDRESS)
-        status = server.status()
-        players = status.players.online
-        max_players = status.players.max
-        version = status.version.name
+        server1 = JavaServer.lookup(address)
+        await asyncio.get_event_loop().run_in_executor(
+            None, lambda: server1.status(timeout=6)
+        )
+    except:
+        pass
+
+    await asyncio.sleep(1)
+
+    try:
+        server2 = JavaServer.lookup(address)
+        status_data = await asyncio.get_event_loop().run_in_executor(
+            None, lambda: server2.status(timeout=8)
+        )
+
+        version = status_data.version.name
+        
+        if "Offline" in version or "offline" in version.lower():
+            raise Exception("Заглушка Aternos")
+
+        players = status_data.players.online
+        max_players = status_data.players.max
+
         await update.message.reply_text(
             f"🟢 Сервер онлайн!\nИгроков: {players}/{max_players}\nВерсия: {version}"
         )
-    except Exception as e:
+    except:
         await update.message.reply_text("🔴 Сервер оффлайн.")
 
 if __name__ == "__main__":
